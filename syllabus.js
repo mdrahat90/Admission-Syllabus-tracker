@@ -1,0 +1,211 @@
+// Syllabus data. Edit this file to add/remove subjects, chapters or programmes.
+// Chapter progress is stored per subject id + chapter index, so don't reorder
+// chapters in a subject after students have started ticking them off.
+
+const SUBJECTS = {
+  phy1: {
+    name: "Physics 1st Paper",
+    chapters: [
+      "Physical World & Measurement",
+      "Vectors",
+      "Dynamics (Kinematics)",
+      "Newtonian Mechanics",
+      "Work, Energy & Power",
+      "Gravitation & Gravity",
+      "Structural Properties of Matter",
+      "Periodic Motion",
+      "Waves",
+      "Ideal Gas & Kinetic Theory of Gases",
+    ],
+  },
+  phy2: {
+    name: "Physics 2nd Paper",
+    chapters: [
+      "Thermodynamics",
+      "Static Electricity",
+      "Current Electricity",
+      "Magnetic Effects of Current & Magnetism",
+      "Electromagnetic Induction & Alternating Current",
+      "Geometrical Optics",
+      "Physical Optics",
+      "Introduction to Modern Physics",
+      "Atomic Models & Nuclear Physics",
+      "Semiconductors & Electronics",
+      "Astronomy",
+    ],
+  },
+  chem1: {
+    name: "Chemistry 1st Paper",
+    chapters: [
+      "Safe Use of Laboratory",
+      "Qualitative Chemistry",
+      "Periodic Properties of Elements & Chemical Bonding",
+      "Chemical Changes",
+    ],
+  },
+  chem2: {
+    name: "Chemistry 2nd Paper",
+    chapters: [
+      "Environmental Chemistry",
+      "Organic Chemistry",
+      "Quantitative Chemistry",
+      "Electrochemistry",
+      "Economic Chemistry",
+    ],
+  },
+  math1: {
+    name: "Higher Math 1st Paper",
+    chapters: [
+      "Matrices & Determinants",
+      "Vectors",
+      "Straight Lines",
+      "Circles",
+      "Permutations & Combinations",
+      "Trigonometric Ratios",
+      "Trigonometric Ratios of Associated Angles",
+      "Functions & Graphs of Functions",
+      "Differentiation",
+      "Integration",
+    ],
+  },
+  math2: {
+    name: "Higher Math 2nd Paper",
+    chapters: [
+      "Real Numbers & Inequalities",
+      "Linear Programming",
+      "Complex Numbers",
+      "Polynomials & Polynomial Equations",
+      "Binomial Expansion",
+      "Conic Sections",
+      "Inverse Trigonometric Functions & Trigonometric Equations",
+      "Statics",
+      "Motion of a Particle in a Plane",
+      "Measures of Dispersion & Probability",
+    ],
+  },
+  bio1: {
+    name: "Biology 1st Paper (Botany)",
+    chapters: [
+      "Cell & its Structure",
+      "Cell Division",
+      "Cell Chemistry",
+      "Microorganisms",
+      "Algae & Fungi",
+      "Bryophyta & Pteridophyta",
+      "Gymnosperms & Angiosperms",
+      "Tissue & Tissue System",
+      "Plant Physiology",
+      "Plant Reproduction",
+      "Biotechnology",
+      "Biodiversity & Conservation",
+    ],
+  },
+  bio2: {
+    name: "Biology 2nd Paper (Zoology)",
+    chapters: [
+      "Animal Diversity & Classification",
+      "Animal Identity",
+      "Digestion & Absorption",
+      "Blood & Circulation",
+      "Locomotion & Movement",
+      "Respiration",
+      "Excretion & Osmoregulation",
+      "Coordination",
+      "Continuity of Human Life",
+      "Human Defence",
+      "Genetics & Evolution",
+      "Animal Behaviour",
+    ],
+  },
+  eng: {
+    name: "English",
+    chapters: [
+      "Grammar: Tenses, Articles, Prepositions",
+      "Grammar: Sentence Structure & Transformation",
+      "Vocabulary: Synonyms, Antonyms, Word Meanings",
+      "Reading Comprehension",
+      "Writing: Paragraph, Letter & Composition",
+    ],
+  },
+  bangla: {
+    name: "Bangla",
+    chapters: [
+      "Grammar & Sentence Structure",
+      "Spelling & Vocabulary",
+      "Bangla Literature (Authors & Works)",
+      "Comprehension & Writing",
+    ],
+  },
+  gk: {
+    name: "General Knowledge",
+    chapters: [
+      "Bangladesh Affairs",
+      "International Affairs",
+      "General Science & ICT",
+      "Current Affairs",
+    ],
+  },
+  acc: {
+    name: "Accounting",
+    chapters: [
+      "Accounting Concepts & Principles",
+      "Journal & Ledger",
+      "Trial Balance & Final Accounts",
+      "Bank Reconciliation",
+      "Depreciation",
+      "Partnership Accounts",
+      "Company Accounts",
+      "Financial Statement Analysis",
+    ],
+  },
+  bom: {
+    name: "Business Organization & Management",
+    chapters: [
+      "Business Basics",
+      "Forms of Business Organization",
+      "Management Functions",
+      "Marketing",
+      "Human Resource Management",
+      "Entrepreneurship",
+    ],
+  },
+};
+
+const PROGRAMMES = [
+  {
+    id: "eng",
+    name: "Engineering",
+    desc: "BUET & engineering universities",
+    subjects: ["phy1", "phy2", "chem1", "chem2", "math1", "math2", "eng"],
+  },
+  {
+    id: "med",
+    name: "Medical",
+    desc: "MBBS & BDS",
+    subjects: ["bio1", "bio2", "chem1", "chem2", "phy1", "phy2", "eng", "gk"],
+  },
+  {
+    id: "sci-math",
+    name: "Public University: Science (Math group)",
+    desc: "Physics, Chemistry, Higher Math, English",
+    subjects: ["phy1", "phy2", "chem1", "chem2", "math1", "math2", "eng"],
+  },
+  {
+    id: "sci-bio",
+    name: "Public University: Science (Biology group)",
+    desc: "Physics, Chemistry, Biology, English",
+    subjects: ["phy1", "phy2", "chem1", "chem2", "bio1", "bio2", "eng"],
+  },
+  {
+    id: "hum",
+    name: "Public University: Humanities",
+    desc: "Bangla, English, General Knowledge",
+    subjects: ["bangla", "eng", "gk"],
+  },
+  {
+    id: "bus",
+    name: "Public University: Business Studies",
+    desc: "Accounting, Business Org., English, GK",
+    subjects: ["acc", "bom", "eng", "gk"],
+  },
+];
