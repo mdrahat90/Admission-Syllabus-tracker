@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>PORIDHI · Syllabus import and validation</title>
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="admin">
+    <p class="eyebrow">PORIDHI · Admin tool</p>
+    <h1 class="display">Syllabus import and validation</h1>
+    <p class="sub">Check a syllabus file (JSON or CSV), read the report, then install it. Nothing is uploaded anywhere; the file is read in this browser.</p>
+
+    <section class="card" style="margin-top:18px">
+      <h2 class="h2">1. Choose the syllabus file</h2>
+      <div class="filebox">
+        <label for="file" class="sr-only">Syllabus file</label>
+        <input id="file" type="file" accept=".json,.csv,.tsv,.txt,application/json,text/csv">
+        <p class="hint">JSON: <code>programmes</code>, <code>subjects</code>, <code>chapters</code>, <code>topics</code> lists with stable IDs. CSV: one row per topic per programme (see README for the columns).</p>
+      </div>
+    </section>
+
+    <div id="report" aria-live="polite"></div>
+
+    <section class="card">
+      <h2 class="h2">On this device</h2>
+      <p id="current"></p>
+      <div class="btn-row" style="margin-top:12px"><button type="button" class="btn btn-secondary" id="remove" hidden>Remove preview from this device</button></div>
+    </section>
+  </div>
+  <script src="data/syllabus.js"></script>
+  <script src="js/core.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

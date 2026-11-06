@@ -2,14 +2,26 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Admission Progress Tracker</title>
-  <meta name="description" content="Track your university admission syllabus progress: what you've finished and what's left.">
-  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>PORIDHI · Syllabus &amp; Admission Preparation Tracker</title>
+  <meta name="description" content="Track your admission syllabus by programme, subject, chapter and topic.">
+  <meta name="theme-color" content="#304F6D">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-  <main id="app"></main>
-  <script src="syllabus.js"></script>
-  <script src="app.js"></script>
+  <div class="shell" id="shell">
+    <main id="main" tabindex="-1"><p class="loading">Loading PORIDHI…</p></main>
+    <nav id="tabs" class="tabs" aria-label="Main"></nav>
+  </div>
+  <div id="layer"></div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <noscript><p style="padding:24px;font-family:sans-serif">PORIDHI needs JavaScript to run.</p></noscript>
+  <script src="data/syllabus.js"></script>
+  <script src="js/core.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>
