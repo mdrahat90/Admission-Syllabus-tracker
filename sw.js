@@ -1,8 +1,8 @@
 /* Offline support. Network first (so syllabus updates reach students), cache as fallback. */
 var CACHE = "poridhi-v2";
 var SHELL = [
-  "./", "index.html", "admin.html", "css/styles.css", "js/core.js", "js/store.js", "js/app.js", "js/admin.js",
-  "data/syllabus.js", "manifest.webmanifest", "icons/icon.svg", "icons/icon-192.png", "icons/icon-512.png"
+  "./", "index.html", "admin.html", "styles.css", "core.js", "store.js", "app.js", "admin.js",
+  "syllabus.js", "manifest.webmanifest", "icon.svg", "icon-192.png", "icon-512.png"
 ];
 
 self.addEventListener("install", function (e) {
