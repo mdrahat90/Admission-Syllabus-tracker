@@ -1,0 +1,646 @@
+{
+ "meta": {
+  "title": "SAMPLE DATA (development only, not a real syllabus)",
+  "syllabus_version": "sample-0",
+  "source_notes": "Placeholder content used only to check the app during development. Delete before release.",
+  "dev_sample": true
+ },
+ "programmes": [
+  {
+   "programme_id": "varsity-science",
+   "programme_name": "Varsity Science",
+   "admission_track": "Varsity Science",
+   "institution_or_unit": "Sample unit"
+  },
+  {
+   "programme_id": "engineering",
+   "programme_name": "Engineering",
+   "admission_track": "Engineering"
+  },
+  {
+   "programme_id": "medical-dental",
+   "programme_name": "Medical & Dental",
+   "admission_track": "Medical & Dental"
+  }
+ ],
+ "subjects": [
+  {
+   "subject_id": "sample-phy",
+   "subject_name": "Sample Physics",
+   "subject_order": 1,
+   "programme_ids": [
+    "varsity-science",
+    "engineering",
+    "medical-dental"
+   ]
+  },
+  {
+   "subject_id": "sample-chem",
+   "subject_name": "Sample Chemistry",
+   "subject_order": 2,
+   "programme_ids": [
+    "varsity-science",
+    "engineering",
+    "medical-dental"
+   ]
+  },
+  {
+   "subject_id": "sample-math",
+   "subject_name": "Sample Mathematics",
+   "subject_order": 3,
+   "programme_ids": [
+    "varsity-science",
+    "engineering"
+   ]
+  },
+  {
+   "subject_id": "sample-bio",
+   "subject_name": "Sample Biology",
+   "subject_order": 4,
+   "programme_ids": [
+    "varsity-science",
+    "medical-dental"
+   ]
+  },
+  {
+   "subject_id": "sample-eng",
+   "subject_name": "Sample English",
+   "subject_order": 5,
+   "programme_ids": [
+    "varsity-science",
+    "engineering",
+    "medical-dental"
+   ]
+  }
+ ],
+ "chapters": [
+  {
+   "chapter_id": "sample-phy-c1",
+   "subject_id": "sample-phy",
+   "chapter_name": "Sample Mechanics",
+   "chapter_number": "1",
+   "chapter_order": 1
+  },
+  {
+   "chapter_id": "sample-phy-c2",
+   "subject_id": "sample-phy",
+   "chapter_name": "Sample Waves",
+   "chapter_number": "2",
+   "chapter_order": 2
+  },
+  {
+   "chapter_id": "sample-phy-c3",
+   "subject_id": "sample-phy",
+   "chapter_name": "Sample Electricity",
+   "chapter_number": "3",
+   "chapter_order": 3
+  },
+  {
+   "chapter_id": "sample-chem-c1",
+   "subject_id": "sample-chem",
+   "chapter_name": "Sample Atomic Structure",
+   "chapter_number": "1",
+   "chapter_order": 1
+  },
+  {
+   "chapter_id": "sample-chem-c2",
+   "subject_id": "sample-chem",
+   "chapter_name": "Sample Organic Basics",
+   "chapter_number": "2",
+   "chapter_order": 2
+  },
+  {
+   "chapter_id": "sample-chem-c3",
+   "subject_id": "sample-chem",
+   "chapter_name": "Sample Equilibrium",
+   "chapter_number": "3",
+   "chapter_order": 3
+  },
+  {
+   "chapter_id": "sample-math-c1",
+   "subject_id": "sample-math",
+   "chapter_name": "Sample Algebra",
+   "chapter_number": "1",
+   "chapter_order": 1
+  },
+  {
+   "chapter_id": "sample-math-c2",
+   "subject_id": "sample-math",
+   "chapter_name": "Sample Calculus",
+   "chapter_number": "2",
+   "chapter_order": 2
+  },
+  {
+   "chapter_id": "sample-math-c3",
+   "subject_id": "sample-math",
+   "chapter_name": "Sample Geometry",
+   "chapter_number": "3",
+   "chapter_order": 3
+  },
+  {
+   "chapter_id": "sample-bio-c1",
+   "subject_id": "sample-bio",
+   "chapter_name": "Sample Cell Biology",
+   "chapter_number": "1",
+   "chapter_order": 1
+  },
+  {
+   "chapter_id": "sample-bio-c2",
+   "subject_id": "sample-bio",
+   "chapter_name": "Sample Human Physiology",
+   "chapter_number": "2",
+   "chapter_order": 2
+  },
+  {
+   "chapter_id": "sample-bio-c3",
+   "subject_id": "sample-bio",
+   "chapter_name": "Sample Genetics",
+   "chapter_number": "3",
+   "chapter_order": 3
+  },
+  {
+   "chapter_id": "sample-eng-c1",
+   "subject_id": "sample-eng",
+   "chapter_name": "Sample Grammar",
+   "chapter_number": "1",
+   "chapter_order": 1
+  },
+  {
+   "chapter_id": "sample-eng-c2",
+   "subject_id": "sample-eng",
+   "chapter_name": "Sample Vocabulary",
+   "chapter_number": "2",
+   "chapter_order": 2
+  }
+ ],
+ "topics": [
+  {
+   "topic_id": "sample-phy-c1-t1",
+   "chapter_id": "sample-phy-c1",
+   "topic_name": "Sample topic: motion in a straight line",
+   "topic_order": 1,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation"
+  },
+  {
+   "topic_id": "sample-phy-c1-t2",
+   "chapter_id": "sample-phy-c1",
+   "topic_name": "Sample topic: vectors and their components",
+   "topic_order": 2,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation",
+   "description": "Sample description text. Shown in the expandable area when the data supplies one.",
+   "source_reference": "Sample source p. 12"
+  },
+  {
+   "topic_id": "sample-phy-c1-t3",
+   "chapter_id": "sample-phy-c1",
+   "topic_name": "Sample topic: Newton's laws applied to connected bodies",
+   "topic_order": 3,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation"
+  },
+  {
+   "topic_id": "sample-phy-c1-t4",
+   "chapter_id": "sample-phy-c1",
+   "topic_name": "Sample topic with a deliberately long title so the wrapping on a narrow Android screen can be checked properly without clipping",
+   "topic_order": 4,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation"
+  },
+  {
+   "topic_id": "sample-phy-c1-t5",
+   "chapter_id": "sample-phy-c1",
+   "topic_name": "Sample extension: rotational dynamics problems",
+   "topic_order": 5,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation",
+   "programmes": {
+    "engineering": {
+     "coverage_layer": "Admission extension"
+    },
+    "varsity-science": {
+     "applicability": "excluded"
+    },
+    "medical-dental": {
+     "applicability": "excluded"
+    }
+   }
+  },
+  {
+   "topic_id": "sample-phy-c2-t1",
+   "chapter_id": "sample-phy-c2",
+   "topic_name": "Sample topic: wave speed and frequency",
+   "topic_order": 1,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation"
+  },
+  {
+   "topic_id": "sample-phy-c2-t2",
+   "chapter_id": "sample-phy-c2",
+   "topic_name": "Sample topic: standing waves",
+   "topic_order": 2,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation"
+  },
+  {
+   "topic_id": "sample-phy-c2-t3",
+   "chapter_id": "sample-phy-c2",
+   "topic_name": "নমুনা বিষয়: তরঙ্গের সমীকরণ (Bengali text check)",
+   "topic_order": 3,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation"
+  },
+  {
+   "topic_id": "sample-phy-c2-t4",
+   "chapter_id": "sample-phy-c2",
+   "topic_name": "Sample topic: Doppler effect",
+   "topic_order": 4,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation",
+   "programmes": {
+    "varsity-science": {
+     "applicability": "conditional"
+    },
+    "engineering": {},
+    "medical-dental": {}
+   }
+  },
+  {
+   "topic_id": "sample-phy-c3-t1",
+   "chapter_id": "sample-phy-c3",
+   "topic_name": "Sample topic: electric field and potential",
+   "topic_order": 1,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation"
+  },
+  {
+   "topic_id": "sample-phy-c3-t2",
+   "chapter_id": "sample-phy-c3",
+   "topic_name": "Sample topic: capacitors in circuits",
+   "topic_order": 2,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation"
+  },
+  {
+   "topic_id": "sample-phy-c3-t3",
+   "chapter_id": "sample-phy-c3",
+   "topic_name": "Sample topic: Kirchhoff's rules",
+   "topic_order": 3,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation"
+  },
+  {
+   "topic_id": "sample-phy-c3-t4",
+   "chapter_id": "sample-phy-c3",
+   "topic_name": "Sample extension: network theorems",
+   "topic_order": 4,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation",
+   "programmes": {
+    "engineering": {
+     "coverage_layer": "Admission extension"
+    },
+    "varsity-science": {
+     "applicability": "excluded"
+    },
+    "medical-dental": {
+     "applicability": "excluded"
+    }
+   }
+  },
+  {
+   "topic_id": "sample-chem-c1-t1",
+   "chapter_id": "sample-chem-c1",
+   "topic_name": "Sample topic: atomic models",
+   "topic_order": 1,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation"
+  },
+  {
+   "topic_id": "sample-chem-c1-t2",
+   "chapter_id": "sample-chem-c1",
+   "topic_name": "Sample topic: quantum numbers",
+   "topic_order": 2,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation"
+  },
+  {
+   "topic_id": "sample-chem-c1-t3",
+   "chapter_id": "sample-chem-c1",
+   "topic_name": "Sample topic: electron configuration",
+   "topic_order": 3,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation"
+  },
+  {
+   "topic_id": "sample-chem-c1-t4",
+   "chapter_id": "sample-chem-c1",
+   "topic_name": "Sample topic: periodic trends",
+   "topic_order": 4,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation"
+  },
+  {
+   "topic_id": "sample-chem-c2-t1",
+   "chapter_id": "sample-chem-c2",
+   "topic_name": "Sample topic: functional groups",
+   "topic_order": 1,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation"
+  },
+  {
+   "topic_id": "sample-chem-c2-t2",
+   "chapter_id": "sample-chem-c2",
+   "topic_name": "Sample topic: nomenclature",
+   "topic_order": 2,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation"
+  },
+  {
+   "topic_id": "sample-chem-c2-t3",
+   "chapter_id": "sample-chem-c2",
+   "topic_name": "Sample topic: isomerism",
+   "topic_order": 3,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation"
+  },
+  {
+   "topic_id": "sample-chem-c2-t4",
+   "chapter_id": "sample-chem-c2",
+   "topic_name": "Sample extension: reaction mechanisms",
+   "topic_order": 4,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation",
+   "programmes": {
+    "medical-dental": {
+     "coverage_layer": "Admission extension"
+    },
+    "varsity-science": {},
+    "engineering": {
+     "applicability": "excluded"
+    }
+   }
+  },
+  {
+   "topic_id": "sample-chem-c3-t1",
+   "chapter_id": "sample-chem-c3",
+   "topic_name": "Sample topic: reversible reactions",
+   "topic_order": 1,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation"
+  },
+  {
+   "topic_id": "sample-chem-c3-t2",
+   "chapter_id": "sample-chem-c3",
+   "topic_name": "Sample topic: Le Chatelier's principle",
+   "topic_order": 2,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation"
+  },
+  {
+   "topic_id": "sample-chem-c3-t3",
+   "chapter_id": "sample-chem-c3",
+   "topic_name": "Sample topic: acid–base equilibria",
+   "topic_order": 3,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation"
+  },
+  {
+   "topic_id": "sample-math-c1-t1",
+   "chapter_id": "sample-math-c1",
+   "topic_name": "Sample topic: polynomials",
+   "topic_order": 1,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation"
+  },
+  {
+   "topic_id": "sample-math-c1-t2",
+   "chapter_id": "sample-math-c1",
+   "topic_name": "Sample topic: inequalities",
+   "topic_order": 2,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation"
+  },
+  {
+   "topic_id": "sample-math-c1-t3",
+   "chapter_id": "sample-math-c1",
+   "topic_name": "Sample topic: sequences and series",
+   "topic_order": 3,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation"
+  },
+  {
+   "topic_id": "sample-math-c1-t4",
+   "chapter_id": "sample-math-c1",
+   "topic_name": "Sample topic: complex numbers",
+   "topic_order": 4,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation"
+  },
+  {
+   "topic_id": "sample-math-c2-t1",
+   "chapter_id": "sample-math-c2",
+   "topic_name": "Sample topic: limits",
+   "topic_order": 1,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation"
+  },
+  {
+   "topic_id": "sample-math-c2-t2",
+   "chapter_id": "sample-math-c2",
+   "topic_name": "Sample topic: differentiation rules",
+   "topic_order": 2,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation"
+  },
+  {
+   "topic_id": "sample-math-c2-t3",
+   "chapter_id": "sample-math-c2",
+   "topic_name": "Sample topic: definite integrals",
+   "topic_order": 3,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation"
+  },
+  {
+   "topic_id": "sample-math-c2-t4",
+   "chapter_id": "sample-math-c2",
+   "topic_name": "Sample extension: integration techniques",
+   "topic_order": 4,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation",
+   "programmes": {
+    "engineering": {
+     "coverage_layer": "Admission extension"
+    },
+    "varsity-science": {}
+   }
+  },
+  {
+   "topic_id": "sample-math-c3-t1",
+   "chapter_id": "sample-math-c3",
+   "topic_name": "Sample topic: straight lines",
+   "topic_order": 1,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation"
+  },
+  {
+   "topic_id": "sample-math-c3-t2",
+   "chapter_id": "sample-math-c3",
+   "topic_name": "Sample topic: circles",
+   "topic_order": 2,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation"
+  },
+  {
+   "topic_id": "sample-math-c3-t3",
+   "chapter_id": "sample-math-c3",
+   "topic_name": "Sample topic: conic sections",
+   "topic_order": 3,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation"
+  },
+  {
+   "topic_id": "sample-bio-c1-t1",
+   "chapter_id": "sample-bio-c1",
+   "topic_name": "Sample topic: cell structure",
+   "topic_order": 1,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation"
+  },
+  {
+   "topic_id": "sample-bio-c1-t2",
+   "chapter_id": "sample-bio-c1",
+   "topic_name": "Sample topic: cell division",
+   "topic_order": 2,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation"
+  },
+  {
+   "topic_id": "sample-bio-c1-t3",
+   "chapter_id": "sample-bio-c1",
+   "topic_name": "Sample topic: membrane transport",
+   "topic_order": 3,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation"
+  },
+  {
+   "topic_id": "sample-bio-c1-t4",
+   "chapter_id": "sample-bio-c1",
+   "topic_name": "Sample topic: enzymes",
+   "topic_order": 4,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation"
+  },
+  {
+   "topic_id": "sample-bio-c2-t1",
+   "chapter_id": "sample-bio-c2",
+   "topic_name": "Sample topic: digestion",
+   "topic_order": 1,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation"
+  },
+  {
+   "topic_id": "sample-bio-c2-t2",
+   "chapter_id": "sample-bio-c2",
+   "topic_name": "Sample topic: circulation",
+   "topic_order": 2,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation"
+  },
+  {
+   "topic_id": "sample-bio-c2-t3",
+   "chapter_id": "sample-bio-c2",
+   "topic_name": "Sample topic: respiration",
+   "topic_order": 3,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation"
+  },
+  {
+   "topic_id": "sample-bio-c2-t4",
+   "chapter_id": "sample-bio-c2",
+   "topic_name": "Sample topic: nervous coordination",
+   "topic_order": 4,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation"
+  },
+  {
+   "topic_id": "sample-bio-c3-t1",
+   "chapter_id": "sample-bio-c3",
+   "topic_name": "Sample topic: Mendelian inheritance",
+   "topic_order": 1,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation"
+  },
+  {
+   "topic_id": "sample-bio-c3-t2",
+   "chapter_id": "sample-bio-c3",
+   "topic_name": "Sample topic: DNA replication",
+   "topic_order": 2,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation"
+  },
+  {
+   "topic_id": "sample-bio-c3-t3",
+   "chapter_id": "sample-bio-c3",
+   "topic_name": "Sample topic: genetic disorders",
+   "topic_order": 3,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation",
+   "programmes": {
+    "medical-dental": {},
+    "varsity-science": {
+     "applicability": "conditional"
+    }
+   }
+  },
+  {
+   "topic_id": "sample-eng-c1-t1",
+   "chapter_id": "sample-eng-c1",
+   "topic_name": "Sample topic: tenses",
+   "topic_order": 1,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation"
+  },
+  {
+   "topic_id": "sample-eng-c1-t2",
+   "chapter_id": "sample-eng-c1",
+   "topic_name": "Sample topic: prepositions",
+   "topic_order": 2,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation"
+  },
+  {
+   "topic_id": "sample-eng-c1-t3",
+   "chapter_id": "sample-eng-c1",
+   "topic_name": "Sample topic: sentence transformation",
+   "topic_order": 3,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation"
+  },
+  {
+   "topic_id": "sample-eng-c2-t1",
+   "chapter_id": "sample-eng-c2",
+   "topic_name": "Sample topic: synonyms and antonyms",
+   "topic_order": 1,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation"
+  },
+  {
+   "topic_id": "sample-eng-c2-t2",
+   "chapter_id": "sample-eng-c2",
+   "topic_name": "Sample topic: word meanings in context",
+   "topic_order": 2,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation"
+  },
+  {
+   "topic_id": "sample-eng-c2-t3",
+   "chapter_id": "sample-eng-c2",
+   "topic_name": "Sample topic: idioms",
+   "topic_order": 3,
+   "applicability": "required",
+   "coverage_layer": "HSC foundation"
+  }
+ ]
+}
