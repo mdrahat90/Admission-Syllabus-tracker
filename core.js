@@ -48,6 +48,72 @@
      Input: relational object { meta, programmes[], subjects[], chapters[], topics[] }.
      Output: { ok, data, errors[], warnings[], counts }. data is null when there are errors. */
 
+  /* ---------- subject selection (which subjects are in a candidate's journey) ---------- */
+
+  var ROLE_BASE = { core: 1, compulsory: 1 }, ROLE_OPTION = { choose_two: 1, optional_opt_in: 1 };
+
+  function buildSelection(p, onb, subs, err, warn) {
+    if (onb === undefined || onb === null) return null;
+    var w = 'programme "' + p.programme_id + '" › onboardingSelection';
+    if (!isObj(onb)) { err(w, "Must be an object."); return null; }
+    var byName = {};
+    subs.forEach(function (sb) { byName[norm(sb.subject_name)] = sb.subject_id; });
+    function ids(list, what) {
+      var out = [];
+      (Array.isArray(list) ? list : []).forEach(function (n) {
+        var id = byName[norm(n)];
+        if (!id) err(w, what + ' "' + str(n) + '" is not a subject of this programme.'); else out.push(id);
+      });
+      return uniq(out);
+    }
+    var type = norm(onb.type).replace(/[\s-]+/g, "_");
+    var cfg = { mode: "", title: str(onb.stepTitle), description: str(onb.stepDescription), option_ids: [], choose_exactly: 0, prompt_id: "", add_label: "", skip_label: "", target_specific_ids: [], base_ids: [] };
+    if (type === "subject_combination") {
+      cfg.mode = "combination";
+      cfg.option_ids = ids(onb.options, "Option");
+      var fixed = ids(onb.fixedSubjects, "Fixed subject");
+      var n = Number(onb.chooseExactly);
+      if (!cfg.option_ids.length) err(w, "A subject_combination needs a non-empty options list.");
+      if (!(n >= 1 && n % 1 === 0 && n <= cfg.option_ids.length)) err(w, "chooseExactly must be a whole number from 1 to the number of options (" + cfg.option_ids.length + ").");
+      else cfg.choose_exactly = n;
+      fixed.forEach(function (id) { if (cfg.option_ids.indexOf(id) >= 0) err(w, "A subject cannot be both fixed and an option (" + id + ")."); });
+    } else if (type === "optional_subject") {
+      cfg.mode = "optional";
+      var pr = ids([onb.promptSubject], "promptSubject");
+      cfg.prompt_id = pr[0] || "";
+      if (!cfg.prompt_id && !str(onb.promptSubject)) err(w, "An optional_subject needs a promptSubject.");
+      var ch = Array.isArray(onb.choices) ? onb.choices.map(str).filter(Boolean) : [];
+      if (ch.length !== 2) err(w, "choices must list exactly two labels: first the one that adds the subject, then the one that continues without it.");
+      else { cfg.add_label = ch[0]; cfg.skip_label = ch[1]; }
+    } else {
+      err(w, 'Unknown onboarding type "' + str(onb.type) + '". Expected subject_combination or optional_subject.');
+      return null;
+    }
+    if (isObj(onb.additionalTargetSpecificSubjects)) cfg.target_specific_ids = ids(Object.keys(onb.additionalTargetSpecificSubjects), "Target-specific subject");
+    subs.forEach(function (sb) { if (sb.selection_role === "target_specific" && cfg.target_specific_ids.indexOf(sb.subject_id) < 0) cfg.target_specific_ids.push(sb.subject_id); });
+    var special = cfg.option_ids.concat(cfg.prompt_id ? [cfg.prompt_id] : [], cfg.target_specific_ids);
+    cfg.base_ids = subs.map(function (sb) { return sb.subject_id; }).filter(function (id) { return special.indexOf(id) < 0; });
+    if (!cfg.base_ids.length) err(w, "No subjects are always included. At least one core subject is needed.");
+    subs.forEach(function (sb) {
+      var id = sb.subject_id, r = sb.selection_role, inBase = cfg.base_ids.indexOf(id) >= 0;
+      if (ROLE_BASE[r] && !inBase) warn(w, 'Subject "' + sb.subject_name + '" is marked ' + r + " but the onboarding rules treat it as selectable.");
+      if (ROLE_OPTION[r] && (inBase || cfg.target_specific_ids.indexOf(id) >= 0)) warn(w, 'Subject "' + sb.subject_name + '" is marked ' + r + " but the onboarding rules do not offer it as a choice.");
+    });
+    return cfg;
+  }
+
+  /* record = { chosen: [subject_id, ...] } as saved for this programme, or undefined if never answered.
+     Returns which subjects are in the journey. activeIds === null means "all subjects of the programme". */
+  function resolveSelection(programme, record) {
+    var cfg = programme && programme.selection;
+    if (!cfg) return { needed: false, complete: true, config: null, chosen: [], activeIds: null };
+    var allowed = cfg.mode === "combination" ? cfg.option_ids : (cfg.prompt_id ? [cfg.prompt_id] : []);
+    var answered = !!(record && Array.isArray(record.chosen));
+    var chosen = uniq(answered ? record.chosen : []).filter(function (id) { return allowed.indexOf(id) >= 0; });
+    var complete = cfg.mode === "combination" ? chosen.length === cfg.choose_exactly : answered;
+    return { needed: true, complete: complete, config: cfg, chosen: chosen, activeIds: cfg.base_ids.concat(complete ? chosen : []) };
+  }
+
   function normalise(raw) {
     var errors = [], warnings = [];
     function err(where, msg) { errors.push({ where: where, msg: msg }); }
@@ -74,7 +140,7 @@
     var noOrder = { subjects: 0, chapters: 0, topics: 0 };
 
     /* programmes */
-    var programmes = [], pById = {};
+    var programmes = [], pById = {}, onbRaw = {};
     raw.programmes.forEach(function (x, i) {
       var w = label("programmes", i, x, "programme_id");
       if (!isObj(x)) { err(w, "Not an object."); return; }
@@ -85,8 +151,11 @@
       var o = {
         programme_id: id, programme_name: str(x.programme_name), admission_track: str(x.admission_track),
         institution_or_unit: str(x.institution_or_unit), syllabus_version: str(x.syllabus_version), source_notes: str(x.source_notes),
-        description: str(x.description), subjects_summary: str(x.subjects_summary), distinction: str(x.distinction), caveat: str(x.caveat)
+        description: str(x.description), subjects_summary: str(x.subjects_summary), distinction: str(x.distinction), caveat: str(x.caveat),
+        selection: null, onboarding: null
       };
+      onbRaw[id] = x.onboardingSelection !== undefined ? x.onboardingSelection : x.onboarding;
+      if (isObj(onbRaw[id])) o.onboarding = onbRaw[id];
       pById[id] = o; programmes.push(o);
     });
 
@@ -105,8 +174,16 @@
       var pids = uniq(idList(x.programme_ids !== undefined ? x.programme_ids : x.programme_id));
       if (!pids.length) err(w, "No programmes listed (programme_ids). A subject must belong to at least one programme.");
       pids.forEach(function (pid) { if (!pById[pid]) err(w, 'Unknown programme "' + pid + '" in programme_ids.'); });
-      var o = { subject_id: id, subject_name: str(x.subject_name), subject_order: ord.state === "ok" ? ord.n : i + 1, icon_key: str(x.icon_key), programme_ids: pids };
+      var dflt = x.default_included !== undefined ? x.default_included : x.defaultIncluded;
+      var o = { subject_id: id, subject_name: str(x.subject_name), subject_order: ord.state === "ok" ? ord.n : i + 1, icon_key: str(x.icon_key), programme_ids: pids,
+        selection_role: norm(x.selection_role !== undefined ? x.selection_role : x.selectionRole).replace(/[\s-]+/g, "_"), default_included: typeof dflt === "boolean" ? dflt : null };
       sById[id] = o; subjects.push(o);
+    });
+
+    /* subject selection rules (onboarding) */
+    programmes.forEach(function (p) {
+      var subs = subjects.filter(function (sb) { return sb.programme_ids.indexOf(p.programme_id) >= 0; });
+      p.selection = buildSelection(p, onbRaw[p.programme_id], subs, err, warn);
     });
 
     /* chapters */
@@ -385,7 +462,8 @@
       var pid = str(p.id);
       out.programmes.push({
         programme_id: pid, programme_name: p.name, admission_track: p.admission_track, institution_or_unit: p.institution_or_unit,
-        source_notes: p.research_basis, description: p.description, subjects_summary: p.subjects_summary, distinction: p.distinction, caveat: p.caveat, _src: pw
+        source_notes: p.research_basis, description: p.description, subjects_summary: p.subjects_summary, distinction: p.distinction, caveat: p.caveat,
+        onboardingSelection: p.onboardingSelection, _src: pw
       });
       if (!Array.isArray(p.subjects)) { err(pw, 'Missing "subjects" list.'); return; }
       p.subjects.forEach(function (s, si) {
@@ -393,7 +471,7 @@
         if (!isObj(s)) { err(sw, "Not an object."); return; }
         if (!str(s.name)) { err(sw, "Missing subject name."); return; }
         var sid = pid + "/" + slug(s.name);
-        out.subjects.push({ subject_id: sid, subject_name: s.name, subject_order: si + 1, programme_ids: [pid], _src: sw });
+        out.subjects.push({ subject_id: sid, subject_name: s.name, subject_order: si + 1, programme_ids: [pid], selectionRole: s.selectionRole, defaultIncluded: s.defaultIncluded, _src: sw });
         if (!Array.isArray(s.chapters)) { err(sw, 'Missing "chapters" list.'); return; }
         s.chapters.forEach(function (c, ci) {
           var cw = sw + " › chapters[" + ci + "]" + (c && c.title ? ' "' + str(c.title) + '"' : "");
@@ -463,20 +541,23 @@
       ix.topicById[t.topic_id] = t;
       (ix.topicsByChapter[t.chapter_id] = ix.topicsByChapter[t.chapter_id] || []).push(t);
     });
-    ix.view = function (pid) {
-      if (!ix._views[pid]) ix._views[pid] = makeView(ix, pid);
-      return ix._views[pid];
+    /* view(pid) = every subject of the programme. view(pid, activeIds) = only those subjects (the candidate's journey). */
+    ix.view = function (pid, activeIds) {
+      var key = pid + (activeIds ? "|" + activeIds.slice().sort().join(",") : "");
+      if (!ix._views[key]) ix._views[key] = makeView(ix, pid, activeIds);
+      return ix._views[key];
     };
     return ix;
   }
 
-  function makeView(ix, pid) {
+  function makeView(ix, pid, activeIds) {
     var programme = ix.programmeById[pid];
     if (!programme) return null;
     var v = { programme: programme, subjects: [], topicInfo: {}, chapterInfo: {}, subjectInfo: {}, total: 0, layers: [], mainLayer: "", hasConditional: false };
     var layerCount = {};
     ix.data.subjects.forEach(function (sub) {
       if (sub.programme_ids.indexOf(pid) < 0) return;
+      if (activeIds && activeIds.indexOf(sub.subject_id) < 0) return;
       var se = { subject: sub, chapters: [] };
       (ix.chaptersBySubject[sub.subject_id] || []).forEach(function (ch) {
         var ce = { chapter: ch, subject: sub, topics: [], n: 0 };
@@ -630,7 +711,7 @@
   return {
     STATUSES: STATUSES, STATUS_LABEL: STATUS_LABEL, APPLICABILITY: APPLICABILITY,
     normalise: normalise, normaliseAny: normaliseAny, importText: importText, parseCsv: parseCsv, csvToRaw: csvToRaw,
-    buildIndex: buildIndex, statusOf: statusOf, pctLabel: pctLabel, computeStats: computeStats,
+    buildIndex: buildIndex, resolveSelection: resolveSelection, statusOf: statusOf, pctLabel: pctLabel, computeStats: computeStats,
     search: search, filterTopics: filterTopics, findUnmatched: findUnmatched, weeklyStudied: weeklyStudied, weekStart: weekStart
   };
 });

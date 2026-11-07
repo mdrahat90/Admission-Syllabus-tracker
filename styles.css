@@ -292,3 +292,16 @@ details.about .src { font-size: 13px; }
 .srclist li + li { border-top: 1px solid var(--line); }
 .srclist .sid { font-size: 12px; color: var(--ink2); }
 .srclist a { color: var(--navy); }
+
+/* subject selection */
+.list.plain.picks > li { padding: 0; }
+.pick { display: flex; align-items: center; gap: 12px; padding: 12px 0; width: 100%; cursor: pointer; }
+.pick input { flex: none; width: 24px; height: 24px; margin: 0; accent-color: var(--navy); order: 3; }
+.pick .row-body { order: 2; }
+.pick .mono { order: 1; }
+.pick.is-off { opacity: .55; cursor: not-allowed; }
+.pick:has(input:focus-visible) { outline: 3px solid var(--navy); outline-offset: 2px; border-radius: 8px; }
+.lockpill { align-self: center; }
+.sel-count { margin-top: 8px; font-size: 14px; font-weight: 600; color: var(--ink2); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.choice.is-current { border: 2px solid var(--navy); background: var(--blue); padding: 13px 15px; }

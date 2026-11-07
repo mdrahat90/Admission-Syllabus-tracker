@@ -34,7 +34,16 @@
   }
 
   var profile = readJson(KEYS.profile, {});
-  profile = { name: String(profile.name || ""), programmeId: String(profile.programmeId || ""), lastChapter: profile.lastChapter && typeof profile.lastChapter === "object" ? profile.lastChapter : {} };
+  /* selections[pid] = { chosen: [subject_id, ...] }: the optional subjects the candidate activated for that programme. */
+  function cleanSelections(v) {
+    var out = {};
+    if (v && typeof v === "object") Object.keys(v).forEach(function (pid) {
+      var r = v[pid];
+      if (r && Array.isArray(r.chosen)) out[pid] = { chosen: r.chosen.filter(function (x) { return typeof x === "string"; }) };
+    });
+    return out;
+  }
+  profile = { name: String(profile.name || ""), programmeId: String(profile.programmeId || ""), lastChapter: profile.lastChapter && typeof profile.lastChapter === "object" ? profile.lastChapter : {}, selections: cleanSelections(profile.selections) };
   var progress = readJson(KEYS.progress, {});
 
   function saveProfile() { return rawSet(KEYS.profile, JSON.stringify(profile)); }
@@ -52,6 +61,11 @@
     getProfile: function () { return profile; },
     updateProfile: function (patch) {
       Object.keys(patch).forEach(function (k) { profile[k] = patch[k]; });
+      return saveProfile();
+    },
+    getSelection: function (pid) { var r = profile.selections[pid]; return r ? { chosen: r.chosen.slice() } : undefined; },
+    setSelection: function (pid, chosen) {
+      profile.selections[pid] = { chosen: chosen.slice() };
       return saveProfile();
     },
     setLastChapter: function (pid, cid) {
@@ -90,13 +104,13 @@
     clearProgramme: function (pid) { delete progress[pid]; return saveProgress(); },
     clearAll: function () {
       progress = {};
-      profile = { name: "", programmeId: "", lastChapter: {} };
+      profile = { name: "", programmeId: "", lastChapter: {}, selections: {} };
       saveProgress(); saveProfile();
     },
 
     /* ---- backup ---- */
     exportBackup: function () {
-      return { app: "poridhi", version: 1, exported_at: new Date().toISOString(), profile: { name: profile.name, programmeId: profile.programmeId, lastChapter: profile.lastChapter }, progress: progress };
+      return { app: "poridhi", version: 1, exported_at: new Date().toISOString(), profile: { name: profile.name, programmeId: profile.programmeId, lastChapter: profile.lastChapter, selections: profile.selections }, progress: progress };
     },
     parseBackup: function (text) {
       var b;
@@ -123,12 +137,12 @@
       var pr = b.profile && typeof b.profile === "object" ? b.profile : {};
       return {
         ok: true, exportedAt: String(b.exported_at || ""), records: records, programmes: programmes,
-        data: { name: String(pr.name || ""), programmeId: String(pr.programmeId || ""), lastChapter: pr.lastChapter && typeof pr.lastChapter === "object" ? pr.lastChapter : {}, progress: clean }
+        data: { name: String(pr.name || ""), programmeId: String(pr.programmeId || ""), lastChapter: pr.lastChapter && typeof pr.lastChapter === "object" ? pr.lastChapter : {}, selections: cleanSelections(pr.selections), progress: clean }
       };
     },
     applyBackup: function (parsed) {
       progress = parsed.data.progress;
-      profile = { name: parsed.data.name || profile.name, programmeId: parsed.data.programmeId, lastChapter: parsed.data.lastChapter };
+      profile = { name: parsed.data.name || profile.name, programmeId: parsed.data.programmeId, lastChapter: parsed.data.lastChapter, selections: parsed.data.selections };
       var a = saveProgress(), b = saveProfile();
       return a && b;
     },

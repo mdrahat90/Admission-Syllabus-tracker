@@ -1,5 +1,5 @@
 /* Offline support. Network first (so syllabus updates reach students), cache as fallback. */
-var CACHE = "poridhi-v2";
+var CACHE = "poridhi-v3";
 var SHELL = [
   "./", "index.html", "admin.html", "styles.css", "core.js", "store.js", "app.js", "admin.js",
   "syllabus.js", "manifest.webmanifest", "icon.svg", "icon-192.png", "icon-512.png"

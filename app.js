@@ -8,7 +8,7 @@
   var main = document.getElementById("main"), tabs = document.getElementById("tabs"), shell = document.getElementById("shell");
   var layer = document.getElementById("layer"), toastEl = document.getElementById("toast");
 
-  var ctx = { mode: "loading", ix: null, report: null, source: "bundled", override: null, step: "name", pending: "", view: null, prog: {}, stats: null, f: { q: "", status: "all", layer: "", cond: false }, limit: 150, undo: null };
+  var ctx = { mode: "loading", ix: null, report: null, source: "bundled", override: null, step: "name", pending: "", view: null, prog: {}, stats: null, f: { q: "", status: "all", layer: "", cond: false }, limit: 150, undo: null, selKey: "", selDraft: [], selShown: false };
   var depth = 0, openerEl = null, dialogConfirm = null, toastTimer = 0;
 
   /* ---------- helpers ---------- */
@@ -71,6 +71,24 @@
     var src = ctx.srcById && ctx.srcById[ref];
     return src ? src.title + " (" + ref + ")" : ref;
   }
+  /* ---------- subject selection helpers ---------- */
+
+  function joinNames(list) { return list.length < 2 ? list.join("") : list.slice(0, -1).join(", ") + " and " + list[list.length - 1]; }
+  function subjName(id) { var sb = ctx.ix.subjectById[id]; return sb ? sb.subject_name : id; }
+  function savedSel(pid) { return C.resolveSelection(ctx.ix.programmeById[pid], S.getSelection(pid)); }
+  /* The candidate's own journey for a programme (only their active subjects), or null while they still have to choose. */
+  function journeyView(pid) {
+    var sel = savedSel(pid);
+    return sel.complete ? ctx.ix.view(pid, sel.activeIds) : null;
+  }
+  function selectionSummary(p) {
+    var cfg = p.selection;
+    if (!cfg) return "";
+    var base = joinNames(cfg.base_ids.map(subjName));
+    if (cfg.mode === "combination") return base + " plus " + cfg.choose_exactly + " of your choice";
+    return base + (cfg.prompt_id ? ". " + subjName(cfg.prompt_id) + " is optional" : "");
+  }
+
   function aboutProgramme(p) {
     var rows = [];
     if (p.description) rows.push("<p>" + esc(p.description) + "</p>");
@@ -131,15 +149,18 @@
     var y = window.scrollY;
     var prof = S.getProfile();
     var html, section = null, after = null;
+    ctx.selShown = false;
 
     if (!prof.name || ctx.step === "name") {
       paint(viewWelcome("name"), null);
     } else if (ctx.mode !== "ready") {
       paint(viewBlocked(), null);
     } else if (!ctx.ix.programmeById[prof.programmeId]) {
-      paint(viewWelcome(ctx.step === "confirm" && ctx.pending && ctx.ix.programmeById[ctx.pending] ? "confirm" : "programme"), null);
+      paint(viewWelcome((ctx.step === "confirm" || ctx.step === "subjects") && ctx.pending && ctx.ix.programmeById[ctx.pending] ? ctx.step : "programme"), null);
+    } else if (!savedSel(prof.programmeId).complete) {
+      paint(viewSelection(prof.programmeId, "gate"), null);
     } else {
-      ctx.view = ctx.ix.view(prof.programmeId);
+      ctx.view = ctx.ix.view(prof.programmeId, savedSel(prof.programmeId).activeIds);
       ctx.prog = S.getProgress(prof.programmeId);
       ctx.stats = C.computeStats(ctx.view, ctx.prog);
       var r = parseHash(), p = r.parts, top = p[0] || "home";
@@ -149,12 +170,15 @@
       else if (top === "stats") { html = viewStats(r.q.get("s")); section = "stats"; }
       else if (top === "topics") { html = viewTopics(r.q); section = "syllabus"; }
       else if (top === "profile") { html = viewProfile(); section = "profile"; }
+      else if (top === "subjects" && ctx.view.programme.selection) { html = viewSelection(prof.programmeId, "edit"); section = "profile"; }
       else { html = viewHome(); section = "home"; }
       paint(html, section);
       if (top === "syllabus" && p[1] === "c" && ctx.view.chapterInfo[p[2]]) S.setLastChapter(prof.programmeId, p[2]);
       var hl = top === "syllabus" && p[1] === "c" ? r.q.get("t") : "", fs = top === "topics" && resetScroll !== false;
       after = function () { afterPaint(hl, fs); };
     }
+    if (!ctx.selShown && ctx.selKey.indexOf("onboarding:") !== 0) ctx.selKey = "";
+    if (ctx.selShown) syncSelectionUi();
     if (resetScroll !== false) { window.scrollTo(0, 0); try { main.focus({ preventScroll: true }); } catch (e) { /* ignore */ } }
     else window.scrollTo(0, y);
     if (after) after();
@@ -294,24 +318,95 @@
     if (step === "programme") {
       var items = ix.data.programmes.map(function (p) {
         var v = ix.view(p.programme_id), sub = progLine(p);
+        var line = p.selection ? selectionSummary(p) : plural(v.subjects.length, "subject") + " · " + plural(v.total, "topic");
         return '<li><button type="button" class="choice" data-act="wel-pick" data-pid="' + esc(p.programme_id) + '"><span class="choice-body"><span class="choice-title">' + esc(pname(p)) + "</span>" +
-          (sub ? '<span class="choice-sub">' + esc(sub) + "</span>" : "") + '<span class="choice-sub">' + plural(v.subjects.length, "subject") + " · " + plural(v.total, "topic") + "</span></span>" + I.right + "</button></li>";
+          (sub ? '<span class="choice-sub">' + esc(sub) + "</span>" : "") + '<span class="choice-sub">' + esc(line) + "</span></span>" + I.right + "</button></li>";
       }).join("");
       return '<div class="welcome"><div class="brand">PORIDHI</div><p class="step">Step 2 of 3</p>' +
         '<h1 class="display">Hi ' + esc(prof.name) + ". Which programme are you preparing for?</h1>" +
         '<p class="lead">Your choice decides which subjects, chapters and topics you see. You can switch later without losing progress.</p>' +
         '<ul class="choices">' + items + '</ul><button type="button" class="btn btn-ghost" data-act="wel-back-name">Change name</button></div>';
     }
-    var p2 = ix.programmeById[ctx.pending], v2 = ix.view(ctx.pending);
+    if (step === "subjects") return viewSelection(ctx.pending, "onboarding");
+    var p2 = ix.programmeById[ctx.pending];
+    var selD = C.resolveSelection(p2, { chosen: ctx.selDraft || [] });
+    var v2 = ix.view(ctx.pending, selD.activeIds);
     var rows = v2.subjects.map(function (se) {
       var n = se.chapters.reduce(function (a, ce) { return a + ce.topics.length; }, 0);
       return '<li><span class="mono" aria-hidden="true">' + esc(mono(se.subject.subject_name)) + '</span><span class="row-body"><span class="row-title">' + esc(se.subject.subject_name) + '</span><span class="row-meta">' + plural(se.chapters.length, "chapter") + " · " + plural(n, "topic") + "</span></span></li>";
     }).join("");
-    return '<div class="welcome"><div class="brand">PORIDHI</div><p class="step">Step 3 of 3</p>' +
+    return '<div class="welcome"><div class="brand">PORIDHI</div><p class="step">Step ' + (p2.selection ? "4 of 4" : "3 of 3") + "</p>" +
       '<h1 class="display">You are preparing for ' + esc(pname(p2)) + "</h1>" + (progLine(p2) ? '<p class="sub">' + esc(progLine(p2)) + "</p>" : "") + (p2.description ? '<p class="lead">' + esc(p2.description) + "</p>" : "") +
-      '<section class="card"><h2 class="h2">Subjects in this programme</h2>' + (rows ? '<ul class="list plain">' + rows + "</ul>" : "<p>No subjects yet.</p>") + "</section>" + goodToKnow(p2) +
+      '<section class="card"><h2 class="h2">' + (p2.selection ? "Subjects in your journey" : "Subjects in this programme") + "</h2>" + (rows ? '<ul class="list plain">' + rows + "</ul>" : "<p>No subjects yet.</p>") + "</section>" + goodToKnow(p2) +
       '<button type="button" class="btn" data-act="wel-confirm">Confirm and open my syllabus</button>' +
+      (p2.selection ? '<button type="button" class="btn btn-ghost" data-act="wel-back-subjects">Change my subjects</button>' : "") +
       '<button type="button" class="btn btn-ghost" data-act="wel-back-programme">Choose a different programme</button></div>';
+  }
+
+  /* The subject-selection screen. mode: "onboarding" (step 3 of 4), "gate" (programme chosen but subjects not yet), "edit" (from Profile). */
+  function viewSelection(pid, mode) {
+    var ix = ctx.ix, p = ix.programmeById[pid], cfg = p.selection, full = ix.view(pid);
+    ctx.selShown = true;
+    var key = mode + ":" + pid;
+    if (ctx.selKey !== key) { ctx.selKey = key; ctx.selDraft = C.resolveSelection(p, S.getSelection(pid)).chosen.slice(); }
+    function counts(id) {
+      var se = full.subjectInfo[id];
+      if (!se) return "";
+      var n = se.chapters.reduce(function (a, ce) { return a + ce.topics.length; }, 0);
+      return plural(se.chapters.length, "chapter") + " · " + plural(n, "topic");
+    }
+    function row(id, rule, extra) {
+      return '<span class="mono" aria-hidden="true">' + esc(mono(subjName(id))) + '</span><span class="row-body"><span class="row-title">' + esc(subjName(id)) + '</span><span class="row-meta">' + esc(rule) + "</span>" +
+        '<span class="row-meta">' + esc(counts(id)) + "</span></span>" + (extra || "");
+    }
+    var inner = "", top;
+    if (mode === "onboarding") {
+      top = '<div class="brand">PORIDHI</div><p class="step">Step 3 of 4</p>';
+    } else if (mode === "gate") {
+      top = '<div class="brand">PORIDHI</div><p class="step">One more step</p>';
+    } else {
+      top = head({ title: cfg.title || "Your subjects", back: "#/profile", crumbs: [{ label: "Profile", href: "#/profile" }, { label: "Subjects" }] });
+    }
+    var heading = mode === "edit" ? "" : '<h1 class="display">' + esc(cfg.title) + "</h1>";
+    var lead = cfg.description ? '<p class="lead">' + esc(cfg.description) + "</p>" : "";
+    var baseTitle = cfg.mode === "combination" ? "Compulsory" : "Included by default";
+    inner += '<section class="card"><h2 class="h2">' + baseTitle + '</h2><ul class="list plain">' + cfg.base_ids.map(function (id) {
+      return "<li>" + row(id, cfg.mode === "combination" ? "Compulsory" : "Core subject", '<span class="pill pill-studied lockpill">' + (cfg.mode === "combination" ? "Always on" : "Included") + "</span>") + "</li>";
+    }).join("") + "</ul></section>";
+    if (cfg.mode === "combination") {
+      inner += '<section class="card"><h2 class="h2">Choose ' + cfg.choose_exactly + '</h2><ul class="list plain picks">' + cfg.option_ids.map(function (id) {
+        return '<li><label class="pick"><input type="checkbox" data-act="sel-toggle" data-sid="' + esc(id) + '">' + row(id, "Optional — choose " + cfg.choose_exactly) + "</label></li>";
+      }).join("") + '</ul><p class="sel-count" id="sel-count" role="status" aria-live="polite"></p></section>';
+      inner += '<button type="button" class="btn" id="sel-continue" data-act="sel-continue" disabled>' + (mode === "edit" ? "Save subjects" : "Continue") + "</button>";
+    } else {
+      var on = ctx.selDraft.indexOf(cfg.prompt_id) >= 0, answered = !!S.getSelection(pid);
+      inner += '<div class="choices">' +
+        '<button type="button" class="choice' + (mode === "edit" && answered && on ? " is-current" : "") + '" data-act="sel-choose" data-add="1"><span class="choice-body"><span class="choice-title">' + esc(cfg.add_label) + '</span><span class="choice-sub">' + esc(counts(cfg.prompt_id)) + "</span></span>" + (mode === "edit" && answered && on ? I.check : I.right) + "</button>" +
+        '<button type="button" class="choice' + (mode === "edit" && answered && !on ? " is-current" : "") + '" data-act="sel-choose" data-add="0"><span class="choice-body"><span class="choice-title">' + esc(cfg.skip_label) + '</span><span class="choice-sub">' + esc(subjName(cfg.prompt_id)) + " stays out of your syllabus and statistics</span></span>" + (mode === "edit" && answered && !on ? I.check : I.right) + "</button></div>";
+    }
+    var foot = "";
+    if (mode === "edit") foot = '<p class="hint">Subjects you leave out are not counted anywhere. Progress you already saved in them is kept if you add them back.</p>';
+    else if (mode === "gate") foot = '<button type="button" class="btn btn-ghost" data-act="switch-prog">Choose a different programme</button>';
+    else foot = '<button type="button" class="btn btn-ghost" data-act="wel-back-programme">Choose a different programme</button>';
+    if (mode === "edit") return top + lead + inner + foot;
+    return '<div class="welcome">' + top + heading + lead + inner + foot + "</div>";
+  }
+
+  /* keeps the checkboxes, the counter and the Continue button in step with ctx.selDraft */
+  function syncSelectionUi() {
+    var ix = ctx.ix, pid = S.getProfile().programmeId;
+    var p = ctx.pending && ctx.step === "subjects" ? ix.programmeById[ctx.pending] : ix.programmeById[pid];
+    if (!p || !p.selection || p.selection.mode !== "combination") return;
+    var n = p.selection.choose_exactly, d = ctx.selDraft, boxes = main.querySelectorAll("input[data-act='sel-toggle']");
+    Array.prototype.forEach.call(boxes, function (b) {
+      var on = d.indexOf(b.getAttribute("data-sid")) >= 0;
+      b.checked = on;
+      b.disabled = !on && d.length >= n;
+      b.closest(".pick").classList.toggle("is-off", b.disabled);
+    });
+    var c = document.getElementById("sel-count"), btn = document.getElementById("sel-continue");
+    if (c) c.textContent = d.length >= n ? "Great. Tap Continue, or untick one to change." : d.length + " of " + n + " selected";
+    if (btn) btn.disabled = d.length !== n;
   }
 
   function viewBlocked() {
@@ -605,6 +700,7 @@
 
     html += '<section class="card"><h2 class="h2">Programme</h2><p class="prog-name">' + esc(pname(p)) + "</p>" + (progLine(p) ? '<p class="sub">' + esc(progLine(p)) + "</p>" : "") +
       '<p class="sub">' + a.studied + " of " + a.total + " topics studied</p>" +
+      (p.selection ? '<p class="sub"><b>Your subjects:</b> ' + esc(joinNames(v.subjects.map(function (se) { return se.subject.subject_name; }))) + '</p><button type="button" class="btn btn-secondary" data-act="edit-subjects">Change subjects</button>' : "") +
       '<button type="button" class="btn btn-secondary" data-act="switch-prog">' + I.swap + "Change programme</button>" +
       '<p class="hint">Each programme keeps its own progress. Switching never erases another programme.</p></section>';
 
@@ -671,9 +767,9 @@
     var ix = ctx.ix, cur = S.getProfile().programmeId;
     var html = '<div class="sheet-head"><div><p class="eyebrow">Programme</p><h2 id="sheet-title" class="sheet-title">Choose your programme</h2></div><button type="button" class="icon-btn" data-act="close-layer" aria-label="Close">' + I.close + '</button></div><ul class="options">' +
       ix.data.programmes.map(function (p) {
-        var s = C.computeStats(ix.view(p.programme_id), S.getProgress(p.programme_id)).all, on = p.programme_id === cur;
+        var jv = journeyView(p.programme_id), s = jv ? C.computeStats(jv, S.getProgress(p.programme_id)).all : null, on = p.programme_id === cur;
         return '<li><button type="button" class="option' + (on ? " is-current" : "") + '" data-act="pick-prog" data-pid="' + esc(p.programme_id) + '"' + (on ? ' aria-current="true" data-autofocus' : "") + '><span class="option-body"><span class="option-title">' + esc(pname(p)) + (on ? " <em>current</em>" : "") + "</span>" +
-          (progLine(p) ? '<span class="option-sub">' + esc(progLine(p)) + "</span>" : "") + '<span class="option-sub">' + s.studied + " of " + s.total + " topics studied</span></span>" + (on ? I.check : "") + "</button></li>";
+          (progLine(p) ? '<span class="option-sub">' + esc(progLine(p)) + "</span>" : "") + '<span class="option-sub">' + (s ? s.studied + " of " + s.total + " topics studied" : "Subjects not chosen yet") + "</span></span>" + (on ? I.check : "") + "</button></li>";
       }).join("") + "</ul>";
     openLayer(html, "");
   }
@@ -693,6 +789,19 @@
     var blob = new Blob([text], { type: type }), url = URL.createObjectURL(blob), a = document.createElement("a");
     a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
     setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+
+  /* Saves or advances the subject selection, depending on where the person is. */
+  function commitSelection() {
+    var prof = S.getProfile(), onboarding = !!(ctx.pending && ctx.step === "subjects");
+    var pid = onboarding ? ctx.pending : prof.programmeId, p = ctx.ix.programmeById[pid];
+    var sd = C.resolveSelection(p, { chosen: ctx.selDraft });
+    if (!sd.complete) return;
+    if (onboarding) { ctx.step = "confirm"; route(true); return; }
+    var editing = ctx.selKey.indexOf("edit:") === 0;
+    S.setSelection(pid, sd.chosen); ctx.selKey = "";
+    if (editing) { goBack("#/profile"); toast("Subjects updated"); }
+    else goReplace("#/home");
   }
 
   function act(name, el) {
@@ -720,11 +829,25 @@
         else if (key === "cond") ctx.f.cond = !ctx.f.cond;
         ctx.limit = 150; updateTopicsBody(); break;
       case "more-results": ctx.limit += 150; document.getElementById("results").innerHTML = resultsHtml(); break;
-      case "wel-pick": ctx.pending = el.getAttribute("data-pid"); ctx.step = "confirm"; route(true); break;
+      case "wel-pick":
+        ctx.pending = el.getAttribute("data-pid"); ctx.selKey = ""; ctx.selDraft = [];
+        ctx.step = ctx.ix.programmeById[ctx.pending].selection ? "subjects" : "confirm"; route(true); break;
+      case "wel-back-subjects": ctx.step = "subjects"; route(true); break;
+      case "sel-toggle":
+        var sid = el.getAttribute("data-sid"), pp = ctx.pending && ctx.step === "subjects" ? ctx.ix.programmeById[ctx.pending] : ctx.ix.programmeById[prof.programmeId], at = ctx.selDraft.indexOf(sid);
+        if (at >= 0) ctx.selDraft.splice(at, 1); else if (ctx.selDraft.length < pp.selection.choose_exactly) ctx.selDraft.push(sid);
+        syncSelectionUi(); break;
+      case "sel-continue": case "sel-choose":
+        if (name === "sel-choose") { var cfg0 = (ctx.pending && ctx.step === "subjects" ? ctx.ix.programmeById[ctx.pending] : ctx.ix.programmeById[prof.programmeId]).selection; ctx.selDraft = el.getAttribute("data-add") === "1" ? [cfg0.prompt_id] : []; }
+        commitSelection(); break;
+      case "edit-subjects": go("#/subjects"); break;
       case "wel-back-name": ctx.step = "name"; route(true); break;
-      case "wel-back-programme": ctx.step = "programme"; ctx.pending = ""; route(true); break;
+      case "wel-back-programme": ctx.step = "programme"; ctx.pending = ""; ctx.selKey = ""; ctx.selDraft = []; route(true); break;
       case "wel-confirm":
-        S.updateProfile({ programmeId: ctx.pending }); ctx.pending = ""; ctx.step = "done";
+        var pend = ctx.ix.programmeById[ctx.pending], sd = C.resolveSelection(pend, { chosen: ctx.selDraft });
+        if (!sd.complete) { ctx.step = "subjects"; route(true); break; }
+        if (pend.selection) S.setSelection(ctx.pending, sd.chosen);
+        S.updateProfile({ programmeId: ctx.pending }); ctx.pending = ""; ctx.step = "done"; ctx.selKey = ""; ctx.selDraft = [];
         goReplace("#/home"); break;
       case "export-backup":
         download("poridhi-backup-" + new Date().toISOString().slice(0, 10) + ".json", JSON.stringify(S.exportBackup(), null, 1), "application/json");
